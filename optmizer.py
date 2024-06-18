@@ -6,7 +6,7 @@ import numdifftools as nd # we use this to calculate t-ratios and p-values
 import csv # we need this to store our parameters as csv
 
 
-def optimizer(betas_start, SLL, model_name, verbose=2):
+def optimizer(betas_start, SLL, model_name, verbose=2, pbar=None):
     # This will give us the initial loglikelihood value as an output
     def callback1(betas):
         print("Current log likelihood:", -SLL(betas))
@@ -35,8 +35,32 @@ def optimizer(betas_start, SLL, model_name, verbose=2):
     # Choose optimisation routine (preferably BFGS)
     optimiser = 'BFGS' # BFGS or L-BFGS-B or nelder-mead
 
-    result = minimize(SLL, np.array(list(betas_start.values())), method=optimiser,callback=combined_callback, 
-                    options={'disp':False}) # ,bounds=bounds1
+    
+    # -If a tqdm progressbar is provided, start with a low gtol and if it does not work increase it :
+    if pbar is not None:
+        gtol=1e-3
+        pbar.set_postfix({"gtol":gtol})
+
+        result = minimize(SLL, np.array(list(betas_start.values())), method=optimiser,callback=combined_callback, 
+                        options={'disp':False, "gtol":gtol}) # ,bounds=bounds1
+            
+        while not result["success"]:
+            gtol += 1e-3
+            pbar.set_postfix({"gtol":gtol}) 
+            result = minimize(SLL, np.array(list(betas_start.values())), method=optimiser,callback=combined_callback, 
+                        options={'disp':False, "gtol":gtol}) # ,bounds=bounds1
+        
+        message = pbar.desc
+        if message ==  "":
+            message = "gtol :"
+        pbar.set_description(message + f" {model_name}:{gtol:.3f}")
+    #Else just compute it once
+    else:
+        result = minimize(SLL, np.array(list(betas_start.values())), method=optimiser,callback=combined_callback, 
+                        options={'disp':False}) # ,bounds=bounds1
+         
+
+
     #args = (parameter_values,)
     if verbose > 0:
         print("Final log likelihood:", -result.fun)

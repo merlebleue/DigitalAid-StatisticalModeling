@@ -7,19 +7,22 @@ import optmizer
 
 def GM_car_following_model(
           data,
+          t_reac,
           model_name,
           panel=1,
           mixing=0,
           remove_variables = {},
-          verbose=2
+          verbose=2,
+          pbar=None
 ):
     # Data-processing
     data['running_task'] = data.groupby(['ID']).cumcount()+1 # counter of observations per individual
 
+    # Use lagged speed
     Acceleration = np.array(data['Acceleration']).reshape(-1, 1)
-    Speed = np.array(data['Speed']).reshape(-1, 1)
-    Space_headway = np.array(data['Space_headway']).reshape(-1, 1)
-    Speed_diff = np.array(data['Speed_diff']).reshape(-1, 1)
+    Speed = np.array(data[f'lag_speed{t_reac}']).reshape(-1, 1)
+    Space_headway = np.array(data[f'lag_s_headway{t_reac}']).reshape(-1, 1)
+    Speed_diff = np.array(data[f'lag_speed{t_reac}']).reshape(-1, 1) - np.array(data[f'lag_speed_lead{t_reac}']).reshape(-1, 1)
 
     ID = np.array(data['ID']) # ID does not need to be reshaped
 
@@ -117,7 +120,8 @@ def GM_car_following_model(
         betas_start=betas_start,
         SLL = SLL,
         model_name=model_name,
-        verbose = verbose
+        verbose = verbose,
+        pbar=pbar
     )
 
     # Return the result and a dict with other usefull vars (to compute results and goodness of fit)
