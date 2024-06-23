@@ -66,13 +66,16 @@ def show_latent_models(results):
 
     def GM(parameters):
         return ("*Accelerating*"
-                f" $$\\alpha_n(t) = {parameters['alpha_acc']} \\cdot \\frac{{V_n(t)^{{{parameters['beta_acc']}}}}}{{\Delta X_n(t)^{{{parameters['gamma_acc']}}}}} \\cdot \\left\\|\\Delta V_n\\left(t-\\tau_n\\right)\\right\\|^{{{parameters['lamda_acc_p']}}}$$"
+                f" $$\\alpha_n(t) = e^{{{parameters['alpha_acc']}}} \\cdot \\frac{{V_n(t)^{{{parameters['beta_acc']}}}}}{{\Delta X_n(t)^{{{parameters['gamma_acc']}}}}} \\cdot \\left\\|\\Delta V_n\\left(t-\\tau_n\\right)\\right\\|^{{{parameters['lamda_acc_p']}}}$$"
+                f" $$\\alpha_n(t) = {np.exp(parameters['alpha_acc']):.3f} \\cdot \\frac{{V_n(t)^{{{parameters['beta_acc']}}}}}{{\Delta X_n(t)^{{{parameters['gamma_acc']}}}}} \\cdot \\left\\|\\Delta V_n\\left(t-\\tau_n\\right)\\right\\|^{{{parameters['lamda_acc_p']}}}$$"
                 "*Decelerating*"
-                f" $$\\alpha_n(t) = {parameters['alpha_dec']} \\cdot \\frac{{V_n(t)^{{{parameters['beta_dec']}}}}}{{\Delta X_n(t)^{{{parameters['gamma_dec']}}}}} \\cdot \\left\\|\\Delta V_n\\left(t-\\tau_n\\right)\\right\\|^{{{parameters['lamda_dec_n']}}}$$"
+                f" $$\\alpha_n(t) = e^{{{parameters['alpha_dec']}}} \\cdot \\frac{{V_n(t)^{{{parameters['beta_dec']}}}}}{{\Delta X_n(t)^{{{parameters['gamma_dec']}}}}} \\cdot \\left\\|\\Delta V_n\\left(t-\\tau_n\\right)\\right\\|^{{{parameters['lamda_dec_n']}}}$$"
+                f" $$\\alpha_n(t) = {np.exp(parameters['alpha_dec']):.3f} \\cdot \\frac{{V_n(t)^{{{parameters['beta_dec']}}}}}{{\Delta X_n(t)^{{{parameters['gamma_dec']}}}}} \\cdot \\left\\|\\Delta V_n\\left(t-\\tau_n\\right)\\right\\|^{{{parameters['lamda_dec_n']}}}$$"
         )
 
     def other_variables(parameters):
-        out = f"$\\mu_{{dn}} = {parameters['dn']:.2f}$<br>"
+        out = ("*Other variables*<br>"
+               f"$\\mu_{{dn}} = {parameters['dn']:.2f}$<br>")
         for var in ["sigma_{acc}" ,"sigma_{dec}" ,"sigma_{dn}"]:
             out += f"$\\{var} = {parameters[var.replace("{", "").replace("}", "")]:.2f}$<br>"
         return out

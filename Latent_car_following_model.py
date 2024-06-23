@@ -21,8 +21,9 @@ def Latent_car_following_model(
 
     Acceleration = np.array(data['Acceleration']).reshape(-1, 1)
     Speed = np.array(data['Speed']).reshape(-1, 1)
-    Space_headway = np.array(data[f'lag_s_headway{t_reac}']).reshape(-1, 1)
-    Speed_diff = np.array(data[f'lag_speed{t_reac}']).reshape(-1, 1) - np.array(data[f'lag_speed_lead{t_reac}']).reshape(-1, 1)
+    Space_headway = np.array(data['Space_headway']).reshape(-1, 1)
+    Lagged_space_headway = np.array(data[f'lag_s_headway{t_reac}']).reshape(-1, 1)
+    Speed_diff = np.array(data[f'lag_speed_lead{t_reac}']).reshape(-1, 1) - np.array(data[f'lag_speed{t_reac}']).reshape(-1, 1)
 
     ID = np.array(data['ID']) # ID does not need to be reshaped
 
@@ -75,8 +76,8 @@ def Latent_car_following_model(
         # Latent classes
         
         # Utility functions
-        U_acc = bc_acc + b_speed_c1*Speed_diff*(Speed_diff>0) + b_space_headway_c1*Space_headway
-        U_dec = bc_dec + b_speed_c2*Speed_diff*(Speed_diff<0) + b_space_headway_c2*Space_headway
+        U_acc = bc_acc + b_speed_c1*Speed_diff*(Speed_diff>0) + b_space_headway_c1*Lagged_space_headway
+        U_dec = bc_dec + b_speed_c2*Speed_diff*(Speed_diff<0) + b_space_headway_c2*Lagged_space_headway
         U_dn = 0
 
         # Utility exponentials
@@ -108,13 +109,13 @@ def Latent_car_following_model(
 
         # Stimulus term (we add a condition to keep only the positive values for acceleration and negative for deceleration)
         stimulus_acc = (
-            (np.abs(Speed_diff + np.exp(-50))**lamda_acc_p)**(Speed_diff>=0)
+            (np.abs(Speed_diff + np.exp(-50))**lamda_acc_p)*(Speed_diff>=0)
             # (np.abs(Speed_diff + np.exp(-50))**lamda_acc_n)*(Speed_diff<0)
             )
         
         stimulus_dec = (
             # (np.abs(Speed_diff + np.exp(-50))**lamda_dec_p)*(Speed_diff>=0)+
-            (np.abs(Speed_diff + np.exp(-50))**lamda_dec_n)**(Speed_diff<0)
+            (np.abs(Speed_diff + np.exp(-50))**lamda_dec_n)*(Speed_diff<0)
             )
 
         # Acceleration - deceleration means
@@ -188,4 +189,5 @@ def Latent_car_following_model(
                  "SLL": SLL,
                  "LL": LL,
                  "Nobs": data.shape[0],
+                 "model_name": model_name,
             })

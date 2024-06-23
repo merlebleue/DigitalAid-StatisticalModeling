@@ -20,9 +20,9 @@ def GM_car_following_model(
 
     # Use lagged speed
     Acceleration = np.array(data['Acceleration']).reshape(-1, 1)
-    Speed = np.array(data[f'lag_speed{t_reac}']).reshape(-1, 1)
-    Space_headway = np.array(data[f'lag_s_headway{t_reac}']).reshape(-1, 1)
-    Speed_diff = np.array(data[f'lag_speed{t_reac}']).reshape(-1, 1) - np.array(data[f'lag_speed_lead{t_reac}']).reshape(-1, 1)
+    Speed = np.array(data['Speed']).reshape(-1, 1)
+    Space_headway = np.array(data['Space_headway']).reshape(-1, 1)
+    Speed_diff = np.array(data[f'lag_speed_lead{t_reac}']).reshape(-1, 1) - np.array(data[f'lag_speed{t_reac}']).reshape(-1, 1)
 
     ID = np.array(data['ID']) # ID does not need to be reshaped
 
@@ -131,4 +131,5 @@ def GM_car_following_model(
                  "SLL": SLL,
                  "LL": LL,
                  "Nobs": data.shape[0],
+                 "model_name": model_name,
             })

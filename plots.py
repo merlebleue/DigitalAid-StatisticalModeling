@@ -44,7 +44,7 @@ class Plotter:
 
     def compute_acceleration(self, Speed, Space_headway, Speed_diff, betas):
         sensitivity_acc = betas["alpha_acc"]*((Speed+np.exp(-50))**betas["beta_acc"])/(Space_headway**betas["gamma_acc"])
-        sensitivity_dec = betas["alpha_dec"]*(                 1                    )/(Space_headway**betas["gamma_dec"])
+        sensitivity_dec = betas["alpha_dec"]*((Speed+np.exp(-50))**betas["beta_dec"])/(Space_headway**betas["gamma_dec"])
         stimulus_acc = np.abs(Speed_diff + np.exp(-50))**betas["lambda_acc"]
         stimulus_dec = np.abs(Speed_diff + np.exp(-50))**betas["lambda_dec"]
 

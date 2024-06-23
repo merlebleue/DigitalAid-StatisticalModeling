@@ -67,7 +67,7 @@ def optimizer(betas_start, SLL, model_name, verbose=2, pbar=None):
 
     return result
 
-def calculate_results(result, betas_start, SLL, LL, Nobs, verbose=2):
+def calculate_results(result, betas_start, SLL, LL, Nobs, model_name, verbose=2):
     # Vector of parameter estimates
     parameters = result['x'] 
 
@@ -119,6 +119,21 @@ def calculate_results(result, betas_start, SLL, LL, Nobs, verbose=2):
     rob_tratio = parameters/rob_se # robust t-ratio
     rob_p_value = (1-t.cdf(np.abs(rob_tratio),dof)) * 2 # robust p-value
 
+    rho_squared = 1 - ((-result.fun)/(-SLL(np.zeros(len(betas_start)))))
+    adj_rho_squared = 1 - (((-result.fun)-len(betas_start))/(-SLL(np.zeros(len(betas_start)))))
+
+    AIC = 2*len(betas_start) - 2*(-result.fun)
+    BIC = len(betas_start)*np.log(Nobs) - 2*(-result.fun)
+
+    LL0t = "Log likelihood at zeros:" + str(-SLL(np.zeros(len(betas_start))))
+    LLinit = "Initial log likelihood:" + str(-SLL(np.array(list(betas_start.values()))))
+    LLfin = "Final log likelihood:" + str(-result.fun)
+
+    rs1 = "rho squared="+str(rho_squared)
+    rs2 = "adjusted rho squared="+str(adj_rho_squared)
+    ac = "AIC="+str(AIC)
+    bc = "BIC="+str(BIC)
+
     arrays = np.column_stack((np.array(list(betas_start.keys())),parameters,se,tratio,p_value,rob_se,rob_tratio,rob_p_value))
     results = pd.DataFrame(arrays, columns = ['Parameter','Estimate','s.e.','t-ratio0','p-value',
                                             'Rob s.e.','Rob t-ratio0','Rob p-value'])
@@ -127,9 +142,24 @@ def calculate_results(result, betas_start, SLL, LL, Nobs, verbose=2):
     results[['Estimate','s.e.','t-ratio0','p-value','Rob s.e.','Rob t-ratio0','Rob p-value']].apply(pd.to_numeric,errors='coerce'))
     numeric_cols = results.select_dtypes(include='number').columns
     results[numeric_cols] = results[numeric_cols].round(3)
+
+
+    # Save output: 
+    with open(f"outputs/{model_name}_results.txt", 'w') as f:
+        f.write(f'{LL0t}\n')
+        f.write(f'{LLinit}\n')
+        f.write(f'{LLfin}\n')
+        f.write(f'{rs1}\n')
+        f.write(f'{rs2}\n')
+        f.write(f'{ac}\n')
+        f.write(f'{bc}\n')
+        results.to_csv(f, index=False, sep='\t')
+    results.to_csv(f'outputs/{model_name}_results.csv', index=False)
+
     return results
 
 def calculate_goodness_of_fit(result, betas_start, SLL, Nobs, **_):
+
     gof = {}
     gof["rho squared"] = 1 - ((-result.fun)/(-SLL(np.zeros(len(betas_start)))))[0]
     gof["adjusted rho squared"] = 1 - (((-result.fun)-len(betas_start))/(-SLL(np.zeros(len(betas_start)))))[0]
